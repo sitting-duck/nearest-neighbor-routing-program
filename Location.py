@@ -1,3 +1,4 @@
+import pprint
 class Location:
     """A class representing a Location with a name, address, and distances to other locations.
 
@@ -41,7 +42,8 @@ class Location:
 
         :return: A string representing the Location object.
         """
-        return f"Location(address={self.address}, distances={self.distances})"
+        pretty_distances = pprint.pformat(self.distances, indent=4)
+        return f"Location(address={self.address}, distances={pretty_distances})"
 
     def __repr__(self):
         """

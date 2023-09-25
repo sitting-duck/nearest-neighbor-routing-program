@@ -56,33 +56,19 @@ class CSVParser_Distances:
 
         with open(self.file_path, 'r') as file:
             while (char := file.read(1)):
-                # numbers inside quotes are part of an address. Numbers outside of quotes are a distance
-                if char == '"':
-                    inside_quotes = not inside_quotes
-                    # if the character is a comma, save the current string into the list of location strings
-                if char == ',' and not inside_quotes:
-                    if self.is_number(current_str):
-                        try:
-                            distance = float(current_str)
-                        except ValueError:
-                            raise ValueError(f"The given string '{current_str}' cannot be converted to a float")
+                if char == ',':
+                    try:
+                        distance = float(current_str)
+                    except ValueError:
+                        raise ValueError(f"The given string '{current_str}' cannot be converted to a float")
 
-                        current_row.append(distance)
-                        current_str = ""
+                    current_row.append(distance)
+                    current_str = ""
 
-                        if len(current_row) == num_locations:
-                            list_of_rows.append(current_row)
-                            current_row = []
-                    else: # current_str is not a number
-                        current_str = "" # was an address so we discard and start over
-
+                    if len(current_row) == num_locations:
+                        list_of_rows.append(current_row)
+                        current_row = []
                 else:
                     current_str += char
-        return list_of_rows
 
-    def is_number(self, s):
-        try:
-            float(s)  # Try to cast the string to a float
-            return True  # Successful conversion, it's a number
-        except ValueError:  # Catch the exception if the conversion fails
-            return False  # Unsuccessful conversion, it's not a number
+        return list_of_rows
