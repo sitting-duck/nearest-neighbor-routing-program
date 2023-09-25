@@ -7,45 +7,38 @@ from NearestNeighbor import NearestNeighbor # authored by student
 from datetime import datetime
 
 def InitData():
-    packages_parser = CSVParser_Packages("packages.csv")
-    package_tuples = packages_parser.parse()
-    my_hash_table = HashTable(len(package_tuples))
-    for myTuple in package_tuples:
-        my_hash_table.add(myTuple[0], myTuple[1:])
 
-    distances_parser = CSVParser_Distances("distances.csv")
+    # init packages
+    packages_parser = CSVParser_Packages("packages.csv")
+    package_tuples = packages_parser.parse2() # tuple is: (package_id, package_object)
+    my_hash_table = HashTable(len(package_tuples))
+    for package_tuple in package_tuples:
+        my_hash_table.add(package_tuple[0], package_tuple[1])
+
+    # init locations
     locations_parser = CSVParser_Locations("locations.csv")
     location_strings = locations_parser.get_unique_location_strings()
-
     num_locations = len(location_strings)
-    print(f"num_locations: {num_locations}")
 
-
+    # init distances
+    distances_parser = CSVParser_Distances("distances.csv")
     adjacency_matrix = distances_parser.create_adjacency_matrix(location_strings)
 
-    for row in adjacency_matrix:
-        print(row)
-
-    locations = []
-    for i in range(num_locations-1):
-        new_location = Location(location_strings[i])
-        print(f"new_location: {new_location}")
-
-        for j in range(num_locations-1):
-            address = location_strings[j]
-            print(f"to_location: {address}")
-            distance = adjacency_matrix[i][j]
-            print(f"distance: {distance}")
-            new_location.add_distance(address, distance)
-
-        locations.append(new_location)
-
-    for location in locations:
-        print(f"location: {location}")
-
+    # locations = []
+    # for i in range(num_locations-1):
+    #     new_location = Location(location_strings[i])
+    #     #print(f"new_location: {new_location}")
+    #
+    #     for j in range(num_locations-1):
+    #         address = location_strings[j]
+    #         #print(f"to_location: {address}")
+    #         distance = adjacency_matrix[i][j]
+    #         #print(f"distance: {distance}")
+    #         new_location.add_distance(address, distance)
+    #
+    #     locations.append(new_location)
 
     return my_hash_table, adjacency_matrix
-
 
 def get_time(str):
     """
@@ -59,12 +52,13 @@ def get_time(str):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    max_load_size = 16  # num packages a truck can hold
+    max_pkg_load_size_per_truck = 16  # max num packages a truck can hold
     num_trucks = 3
     num_drivers = 2
     max_miles = 140
     earliest_start_time = get_time("8:00am")
     avg_speed_mph = 18
+    avg_num_pkgs_per_day = 40
 
     hash_table, adj_matrix = InitData()
     nearest_neighbor_algo = NearestNeighbor()
