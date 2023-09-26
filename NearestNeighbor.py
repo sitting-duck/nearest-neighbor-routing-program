@@ -1,7 +1,8 @@
 
 class NearestNeighbor:
-    def __init__(self):
-        pass
+    def __init__(self, avg_speed_mph):
+        self.avg_speed_mph = avg_speed_mph
+
     def run(self, adj_matrix, start_node=0):
         """
         Nearest Neighbor algorithm for TSP.
@@ -30,19 +31,24 @@ class NearestNeighbor:
         unvisited = set(range(num_nodes))
         current_node = start_node
         tour = [current_node]
+        time_traveled = [0]
         total_cost = 0
 
         unvisited.remove(current_node)
 
         while unvisited:
             nearest_node = min(unvisited, key=lambda node: adj_matrix[current_node][node])
-            total_cost += adj_matrix[current_node][nearest_node]
+            current_cost = adj_matrix[current_node][nearest_node]
+            total_cost += current_cost
+            time_traveled.append(current_cost/self.avg_speed_mph)
             current_node = nearest_node
             tour.append(current_node)
             unvisited.remove(current_node)
 
         # Return to the start node to complete the tour
-        total_cost += adj_matrix[current_node][start_node]
+        last_cost = adj_matrix[current_node][start_node]
+        total_cost += last_cost
+        time_traveled.append(last_cost/self.avg_speed_mph)
         tour.append(start_node)
 
-        return tour, total_cost
+        return tour, total_cost, time_traveled

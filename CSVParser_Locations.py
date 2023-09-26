@@ -28,11 +28,13 @@ class CSVParser_Locations:
                     inside_quotes = not inside_quotes
                 # if the character is a comma, save the current string into the list of location strings
                 if char == ',' and not inside_quotes:
-                    location_strings.append(current_str)
+                    current_str = current_str.replace('"', '')
+                    location_strings.append(current_str.replace('\n', ''))
                     current_str = ""
                 else:
                     current_str += char
             if current_str:
                 # save the last string if it's not empty
-                location_strings.append(current_str)
+                current_str = current_str.replace('"', '')
+                location_strings.append(current_str.replace('\n', ''))
             return location_strings

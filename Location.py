@@ -16,15 +16,17 @@ class Location:
 
     """
 
-    def __init__(self, address: str, distances: dict[str, float] = None):
+    def __init__(self, name, address: str, distances: dict[str, float] = None):
         """
         Initializes a new Location object.
 
+        :param name: The name of the location.
         :param address: The address of the location.
         :param distances: A dictionary representing the distances to other locations.
                           Keys are location names, and values are distances in float.
         """
-        self.address = address  # The address of the location
+        self.name = name                                             # the name of the location
+        self.address = address                                       # The address of the location
         self.distances = distances if distances is not None else {}  # Distances to other locations
 
     def add_distance(self, address: str, distance: float):

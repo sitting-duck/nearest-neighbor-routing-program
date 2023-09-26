@@ -11,6 +11,7 @@ class CSVParser_Packages:
         print(package)
 
     """
+
     def __init__(self, file_path):
         # Try to open the file to check if it exists
         try:
@@ -83,21 +84,18 @@ class CSVParser_Packages:
                         else:
                             corrected_values.append(value)
 
-                package_id = corrected_values[0] # contains first value
+                package_id = corrected_values[0]  # contains first value
                 address = corrected_values[1]
                 city = corrected_values[2]
                 state = corrected_values[3]
-                zip = corrected_values[4]
+                zip_code = corrected_values[4]
                 deadline = corrected_values[5]
                 weight = corrected_values[6]
                 note = corrected_values[7]
                 delivery_time = -1
 
-
-                package = Package(address, deadline, city, zip, weight, Status.hub, delivery_time, note)
+                package = Package(package_id, address, deadline, city, state, zip_code, weight, Status.hub, delivery_time, note)
                 print(f"package_id: {package_id} package: {package}")
-                packages.append((package_id, package)) # add a tuple of package id and then package object
+                packages.append((package_id, package))  # add a tuple of package id and then package object
 
         return packages
-
-

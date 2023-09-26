@@ -5,6 +5,7 @@ class HashTable:
 
         self.size = size
         self.table = [[] for _ in range(self.size)]
+        self.num_packages = 0
 
     def hash_function(self, key):
         try:
@@ -14,6 +15,8 @@ class HashTable:
 
         return int_key % self.size
 
+    def get_package_id_from_hash(self, key):
+        return self.size - key
     def string_hash(input_string: str) -> int:
         # Define a prime number as a base for modulo operation to limit the hash value's size
         mod_base = 2 ** 32 - 1
@@ -43,6 +46,8 @@ class HashTable:
         else:
             bucket.append((key, value))
 
+        self.num_packages += 1
+
     def get(self, key):
         hash_index = self.hash_function(key)
         bucket = self.table[hash_index]
@@ -69,3 +74,12 @@ class HashTable:
                 for kv in bucket:
                     k, v = kv
                     print(f"  Key: {k}, Value: {v}")
+
+    def get_n_packages(self, num):
+        packages = self.table[0:num] # grab num packages
+        self.table = self.table[num:] # remove the packages from table
+        self.num_packages -= num
+        return packages
+
+    def how_many_packages(self):
+        return self.num_packages
