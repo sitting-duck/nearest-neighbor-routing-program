@@ -65,6 +65,14 @@ def get_time(str):
 def get_submatrix(matrix, start_row, end_row, start_col, end_col):
     return [row[start_col:end_col+1] for row in matrix[start_row:end_row+1]]
 
+def extract_submatrix(matrix, indices):
+    submatrix = []
+    for i in indices:
+        row = []
+        for j in indices:
+            row.append(matrix[i][j])
+        submatrix.append(row)
+    return submatrix
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -97,12 +105,11 @@ if __name__ == '__main__':
                 indices.append(location_strings.index(unique_location))
     print(f"le indices: {len(indices)}")
 
+    sub_matrix = extract_submatrix(adj_matrix, indices)
 
     nearest_neighbor_algo = NearestNeighbor(avg_speed_mph)
 
-    #sub_adjacency_matrix = get_sub_matrix_for_packages(adj_matrix, packages)
-
-    tour, total_cost, time_traveled = nearest_neighbor_algo.run(adj_matrix)
+    tour, total_cost, time_traveled = nearest_neighbor_algo.run(sub_matrix)
 
     print(f"tour: {tour} tour length: {len(tour)}")
     print(f"total_cost: {total_cost}")
