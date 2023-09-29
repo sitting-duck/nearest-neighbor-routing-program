@@ -33,8 +33,4 @@ class CSVParser_Locations:
                     current_str = ""
                 else:
                     current_str += char
-            if current_str:
-                # save the last string if it's not empty
-                current_str = current_str.replace('"', '')
-                location_strings.append(current_str.replace('\n', ''))
             return location_strings

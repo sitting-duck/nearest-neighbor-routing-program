@@ -4,19 +4,20 @@
 # Program Mentor: Denece Meyer, (385) 428-6184, Mountain Time
 # email: athar16@my.wgu.edu, ashley.tharp@gmail.com
 
-from CSVParser_Packages import CSVParser_Packages # authored by student
-from CSVParser_Distances import CSVParser_Distances # authored by student
-from CSVParser_Locations import CSVParser_Locations # authored by student
-from HashTable import HashTable # authored by student
-from Location import Location # authored by student
-from NearestNeighbor import NearestNeighbor # authored by student
-from datetime import datetime
+from CSVParser_Packages import CSVParser_Packages       # authored by student
+from CSVParser_Distances import CSVParser_Distances     # authored by student
+from CSVParser_Locations import CSVParser_Locations     # authored by student
+from HashTable import HashTable                         # authored by student
+from Location import Location                           # authored by student
+from NearestNeighbor import NearestNeighbor             # authored by student
+from Driver import Driver                               # authored by student
+from datetime import datetime, timedelta
+from TimeUtils import *
 
 def InitData():
-
     # init packages
     packages_parser = CSVParser_Packages("packages.csv")
-    package_tuples = packages_parser.parse2() # tuple is: (package_id, package_object)
+    package_tuples = packages_parser.parse2()  # tuple is: (package_id, package_object)
     my_hash_table = HashTable(len(package_tuples))
     for package_tuple in package_tuples:
         my_hash_table.add(package_tuple[0], package_tuple[1])
@@ -25,7 +26,7 @@ def InitData():
     locations_parser = CSVParser_Locations("locations.csv")
     location_strings = locations_parser.get_unique_location_strings()
     num_locations = len(location_strings)
-
+    print(f"num_locations: {num_locations}")
 
     # init distances
     distances_parser = CSVParser_Distances("distances.csv")
@@ -33,13 +34,14 @@ def InitData():
 
     return my_hash_table, adjacency_matrix, location_strings
 
+
 def get_sub_matrix_for_packages(adj_matrix, packages):
     pass
     # address_strings = []
     # for package in packages:
     #     address_strings.append(package.get_address_string())
 
-    #unique_address_list = list(set(address_strings)) # use set to create a list of only the unique addresses
+    # unique_address_list = list(set(address_strings)) # use set to create a list of only the unique addresses
 
     # locations = []
     # for i in range(num_locations-1):
@@ -53,28 +55,58 @@ def get_sub_matrix_for_packages(adj_matrix, packages):
     #         new_location.add_distance(address, distance)
     #     locations.append(new_location)
 
-def get_time(str):
-    """
-    str: a string in the format: "9:00am", "5:30pm" etc. Use civilian time and am/pm, not military time.
-    Once you have datetime objects, you can easily compare them using standard comparison operators (<, >, ==, etc.).
-    """
-    time_format = "%I:%M%p"
-    time = datetime.strptime(str, time_format)
-    return time
-
 def get_submatrix(matrix, start_row, end_row, start_col, end_col):
-    return [row[start_col:end_col+1] for row in matrix[start_row:end_row+1]]
+    return [row[start_col:end_col + 1] for row in matrix[start_row:end_row + 1]]
+
 
 def extract_submatrix(matrix, indices):
+    #print(f"extract_submatrix() indices: {indices}")
     submatrix = []
     for i in indices:
         row = []
         for j in indices:
+            #print(f"i: {i} j: {j} matrix_ij: {matrix[i - 1][j - 1]}")
             row.append(matrix[i][j])
         submatrix.append(row)
     return submatrix
 
-# Press the green button in the gutter to run the script.
+def get_indices_for_locations(unique_locations):
+    # now get the list of location coordinates that match these addresses in the original adj_matrix
+    indices = []
+    for unique_location in unique_locations:
+        for lstring in location_strings:
+            if lstring == unique_location:
+                new_index = location_strings.index(unique_location)
+                # print(f"adding index {new_index} for location: {unique_location}")
+                indices.append(new_index)
+    return indices
+
+def get_unique_locations(package_load):
+    unique_locations = []
+    for package in package_load:
+        unique_locations.append(package[0][1].get_address_string())
+    unique_locations = list(set(unique_locations))
+    return unique_locations
+
+def get_arrival_times(hop_times):
+    arrival_times = [start_time]
+    for hop_time in hop_times:
+        delta = timedelta(hours=hop_time)
+        new_time = arrival_times[-1] + delta
+        #print(f"hop_time: {hop_time} delta: {delta} new_time: {get_time_string(new_time)}")
+        arrival_times.append(new_time)
+
+    arrival_times_str = [get_time_string(time) for time in arrival_times]
+    arrival_times_str = arrival_times_str[1:]
+    return arrival_times, arrival_times_str
+
+def get_drivers(num_drivers):
+    drivers = []
+    for driver_id_num in range(0, num_drivers):
+        driver = Driver(driver_id_num, earliest_start_time)
+        drivers.append(driver)
+    return drivers
+
 if __name__ == '__main__':
     max_pkg_load_size_per_truck = 16  # max num packages a truck can hold
     num_trucks = 3
@@ -84,36 +116,48 @@ if __name__ == '__main__':
     avg_speed_mph = 18
     avg_num_pkgs_per_day = 40
 
-
     packages_hash_table, adj_matrix, location_strings = InitData()
 
-    #print(f"before: {packages_hash_table.how_many_packages()}")
-    package_load = packages_hash_table.get_n_packages(max_pkg_load_size_per_truck)
-    unique_locations = []
-    for package in package_load:
-        unique_locations.append(package[0][1].get_address_string())
-    unique_locations = list(set(unique_locations))
-
-    print(f'package_load len: {len(package_load)}')
-    print(f'unique_location len: {len(unique_locations)}')
-
-    # now get the list of location coordinates that match these addresses in the original adj_matrix
-    indices = []
-    for unique_location in unique_locations:
-        for lstring in location_strings:
-            if lstring == unique_location:
-                indices.append(location_strings.index(unique_location))
-    print(f"le indices: {len(indices)}")
-
-    sub_matrix = extract_submatrix(adj_matrix, indices)
-
+    start_time = earliest_start_time
     nearest_neighbor_algo = NearestNeighbor(avg_speed_mph)
 
-    tour, total_cost, time_traveled = nearest_neighbor_algo.run(sub_matrix)
+    driver_end_times = []
+    drivers = get_drivers(num_drivers)
 
-    print(f"tour: {tour} tour length: {len(tour)}")
-    print(f"total_cost: {total_cost}")
-    print(f"time_traveled: {time_traveled} time_traveled_len: {len(time_traveled)}")
+    while packages_hash_table.how_many_packages() > 0:
 
+        # sort drivers by last start time
+        drivers = sorted(drivers, key=lambda driver: driver.get_last_start_time())
+        print("\ndrivers sorted by HUB arrival time: ", end='')
+        for driver in drivers:
+            print(driver.__str__(), end=' ')
+        print()
 
+        for driver in drivers:
 
+            # check if there are any more packages
+            how_many_packages = int(packages_hash_table.how_many_packages())
+            if how_many_packages == 0:
+                break
+
+            # if there are still some, get next batch of packages
+            package_load = packages_hash_table.get_n_packages(min(max_pkg_load_size_per_truck, how_many_packages))
+            print(f"\tdriver {driver.idNum} got: {len(package_load)} packages.")
+
+            # some packages may go to same place, determine the total set of locations for our trip
+            unique_locations = get_unique_locations(package_load)
+
+            # now get the list of location coordinates that match these addresses in the original adj_matrix
+            indices = get_indices_for_locations(unique_locations)
+
+            # create a sub matrix of distances for all the locations needed for this batch of packages
+            sub_matrix = extract_submatrix(adj_matrix, indices)
+            tour, total_cost, hop_times, tour_cost = nearest_neighbor_algo.run(sub_matrix) # calculate the tour using the sub matrix
+            arrival_times, arrival_times_str = get_arrival_times(hop_times)
+
+            driver.add_start_time(arrival_times[-1])
+
+            print(f"\t\ttour: {tour} tour length: {len(tour)}")
+            print(f"\t\ttour_cost: {tour_cost} tour_cost length: {len(tour_cost)}")
+            print(f"\t\ttotal_cost: {total_cost}")
+            print(f"\t\tarrival_times_str: {arrival_times_str} len: {len(arrival_times_str)}")

@@ -33,6 +33,7 @@ class NearestNeighbor:
         tour = [current_node]
         time_traveled = [0]
         total_cost = 0
+        tour_cost = []
 
         unvisited.remove(current_node)
 
@@ -43,6 +44,7 @@ class NearestNeighbor:
             time_traveled.append(current_cost/self.avg_speed_mph)
             current_node = nearest_node
             tour.append(current_node)
+            tour_cost.append(current_cost)
             unvisited.remove(current_node)
 
         # Return to the start node to complete the tour
@@ -50,5 +52,6 @@ class NearestNeighbor:
         total_cost += last_cost
         time_traveled.append(last_cost/self.avg_speed_mph)
         tour.append(start_node)
+        tour_cost.append(last_cost)
 
-        return tour, total_cost, time_traveled
+        return tour, total_cost, time_traveled, tour_cost

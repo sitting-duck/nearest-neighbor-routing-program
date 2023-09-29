@@ -76,9 +76,14 @@ class HashTable:
                     print(f"  Key: {k}, Value: {v}")
 
     def get_n_packages(self, num):
-        packages = self.table[0:num] # grab num packages
-        self.table = self.table[num:] # remove the packages from table
-        self.num_packages -= num
+        if len(self.table) >= num:
+            howmany = num
+        else:
+            howmany = len(self.table)
+
+        packages = self.table[0:howmany]  # grab num packages
+        self.table = self.table[howmany:]  # remove the packages from table
+        self.num_packages -= howmany
         return packages
 
     def how_many_packages(self):

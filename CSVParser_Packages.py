@@ -95,7 +95,7 @@ class CSVParser_Packages:
                 delivery_time = -1
 
                 package = Package(package_id, address, deadline, city, state, zip_code, weight, Status.hub, delivery_time, note)
-                print(f"package_id: {package_id} package: {package}")
+                #print(f"package_id: {package_id} package: {package}")
                 packages.append((package_id, package))  # add a tuple of package id and then package object
 
         return packages

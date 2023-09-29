@@ -26,8 +26,7 @@ class Package:
             :return: A string representing the Package object.
         """
         return (f'id: {self.id_unique} \naddress: {self.address}\n deadline: {self.deadline}\n city: {self.city}\n zip: {self.zip_code}\n '
-                f'weight: {self.weight}\n status: {self.status}\n delivery_time: {self.delivery_time}\
-                n note: {self.note}\n')
+                f'weight: {self.weight}\n status: {self.status}\n delivery_time: {self.delivery_time}\n note: {self.note}\n')
 
     def __repr__(self):
         """
