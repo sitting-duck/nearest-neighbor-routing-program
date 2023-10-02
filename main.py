@@ -3,7 +3,7 @@
 # Start Date: Nov 1, 2019
 # Program Mentor: Denece Meyer, (385) 428-6184, Mountain Time
 # email: athar16@my.wgu.edu, ashley.tharp@gmail.com
-
+import TimeUtils
 from CSVParser_Packages import CSVParser_Packages       # authored by student
 from CSVParser_Distances import CSVParser_Distances     # authored by student
 from CSVParser_Locations import CSVParser_Locations     # authored by student
@@ -92,7 +92,7 @@ def get_unique_locations(package_load, location_strings):
     unique_locations = list(set(unique_locations))
     return unique_locations
 
-def get_arrival_times(hop_times):
+def get_arrival_times(hop_times, start_time):
     arrival_times = [start_time]
     for hop_time in hop_times:
         delta = timedelta(hours=hop_time)
@@ -155,7 +155,12 @@ if __name__ == '__main__':
 
             # if there are still some, get next batch of packages
             package_load = packages_hash_table.get_n_packages(min(max_pkg_load_size_per_truck, how_many_packages))
-            print(f"\tdriver {driver.idNum} got: {len(package_load)} packages.")
+            new_pickup_time = driver.get_last_start_time()
+            new_pickup_time_str = TimeUtils.get_time_string(new_pickup_time)
+            print(f"\tdriver {driver.idNum} got: {len(package_load)} packages at: {new_pickup_time_str}")
+
+            #for package in package_load:
+            #    print(f"package: {package}")
 
             # some packages may go to same place, determine the total set of locations for our trip
             unique_locations = get_unique_locations(package_load, location_strings)
@@ -172,7 +177,7 @@ if __name__ == '__main__':
             for hop in tour:
                 tour_global.append(indices[hop])
 
-            arrival_times, arrival_times_str = get_arrival_times(hop_times)
+            arrival_times, arrival_times_str = get_arrival_times(hop_times, new_pickup_time)
 
             driver.add_start_time(arrival_times[-1]) # the hub arrival time is the last arrival time of the tour
 
@@ -195,7 +200,7 @@ if __name__ == '__main__':
                     continue
 
                 destination_string = location_strings[destination_index]
-                print(f"package delivered to index: {destination_index} of address: {destination_string}")
+                print(f"\t\t\tpackage delivered to index: {destination_index} of address: {destination_string}")
 
                 packages = get_packages_with_matching_destination(destination_string, package_load)
                 if len(packages) == 0:
@@ -205,4 +210,4 @@ if __name__ == '__main__':
 
 
             for event in events:
-                print(f"event: {event}")
+                print(f"\t\t\t\tevent: {event}")

@@ -21,7 +21,7 @@ class PackageEvent():
             :return: A string representing the Package object.
         """
         time_str = TimeUtils.get_time_string(self.time)
-        return f'package_id: {self.package_id} event_type: {self.event_type} time: {time_str}\n'
+        return f'package_id: {self.package_id} event_type: {self.event_type} time: {time_str}'
 
     def __repr__(self):
         """
