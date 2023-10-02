@@ -84,7 +84,11 @@ class HashTable:
         packages = self.table[0:howmany]  # grab num packages
         self.table = self.table[howmany:]  # remove the packages from table
         self.num_packages -= howmany
-        return packages
+
+        package_list = []
+        for package in packages:
+            package_list.append(package[0][1])
+        return package_list
 
     def how_many_packages(self):
         return self.num_packages

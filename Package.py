@@ -1,11 +1,9 @@
 from enum import Enum, auto
 
-
 class Status(Enum):
     hub = 0
     enroute = 1
     delivered = 2
-
 
 class Package:
     def __init__(self, id_unique, address, deadline, city, state, zip_code, weight, status, delivery_time, note):
@@ -40,3 +38,4 @@ class Package:
 
     def get_address_string(self):
         return self.address + ", " + self.city + ", " + self.state + " " + self.zip_code
+

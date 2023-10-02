@@ -53,6 +53,5 @@ class NearestNeighbor:
         time_traveled.append(last_cost/self.avg_speed_mph)
         tour.append(start_node)
         tour_cost.append(last_cost)
-        time_traveled.pop(0)
 
         return tour, total_cost, time_traveled, tour_cost

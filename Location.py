@@ -16,7 +16,7 @@ class Location:
 
     """
 
-    def __init__(self, name, address: str, distances: dict[str, float] = None):
+    def __init__(self, index, name, address: str, distances: dict[str, float] = None):
         """
         Initializes a new Location object.
 
@@ -25,6 +25,7 @@ class Location:
         :param distances: A dictionary representing the distances to other locations.
                           Keys are location names, and values are distances in float.
         """
+        self.index = index
         self.name = name                                             # the name of the location
         self.address = address                                       # The address of the location
         self.distances = distances if distances is not None else {}  # Distances to other locations

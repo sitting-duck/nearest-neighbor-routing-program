@@ -12,6 +12,8 @@ from Location import Location                           # authored by student
 from NearestNeighbor import NearestNeighbor             # authored by student
 from Driver import Driver                               # authored by student
 from datetime import datetime, timedelta
+
+from PackageEvent import PackageEventType, PackageEvent
 from TimeUtils import *
 
 def InitData():
@@ -27,13 +29,15 @@ def InitData():
     location_strings = locations_parser.get_unique_location_strings()
     num_locations = len(location_strings)
     print(f"num_locations: {num_locations}")
+    locations = []
+    for i in range(0, len(location_strings)):
+        locations.append(Location(i, "", location_strings[i]))
 
     # init distances
     distances_parser = CSVParser_Distances("distances.csv")
     adjacency_matrix = distances_parser.create_adjacency_matrix(location_strings)
 
-    return my_hash_table, adjacency_matrix, location_strings
-
+    return my_hash_table, adjacency_matrix, locations, location_strings
 
 def get_sub_matrix_for_packages(adj_matrix, packages):
     pass
@@ -81,10 +85,10 @@ def get_indices_for_locations(unique_locations):
                 indices.append(new_index)
     return indices
 
-def get_unique_locations(package_load):
+def get_unique_locations(package_load, location_strings):
     unique_locations = []
     for package in package_load:
-        unique_locations.append(package[0][1].get_address_string())
+        unique_locations.append(package.get_address_string())
     unique_locations = list(set(unique_locations))
     return unique_locations
 
@@ -97,7 +101,7 @@ def get_arrival_times(hop_times):
         arrival_times.append(new_time)
 
     arrival_times_str = [get_time_string(time) for time in arrival_times]
-    arrival_times_str = arrival_times_str[1:]
+    #arrival_times_str = arrival_times_str[1:]
     return arrival_times, arrival_times_str
 
 def get_drivers(num_drivers):
@@ -107,8 +111,17 @@ def get_drivers(num_drivers):
         drivers.append(driver)
     return drivers
 
+def get_packages_with_matching_destination(destination_string, package_load):
+    packages = []
+    for package in package_load:
+        address_string = package.get_address_string()
+        #print(f"\taddress_string: {address_string} destination_string: {destination_string}")
+        if address_string == destination_string:
+            packages.append(package)
+    return packages
+
 if __name__ == '__main__':
-    max_pkg_load_size_per_truck = 16  # max num packages a truck can hold
+    max_pkg_load_size_per_truck = 2 # 16  # max num packages a truck can hold
     num_trucks = 3
     num_drivers = 2
     max_miles = 140
@@ -116,7 +129,7 @@ if __name__ == '__main__':
     avg_speed_mph = 18
     avg_num_pkgs_per_day = 40
 
-    packages_hash_table, adj_matrix, location_strings = InitData()
+    packages_hash_table, adj_matrix, locations, location_strings = InitData()
 
     start_time = earliest_start_time
     nearest_neighbor_algo = NearestNeighbor(avg_speed_mph)
@@ -145,19 +158,51 @@ if __name__ == '__main__':
             print(f"\tdriver {driver.idNum} got: {len(package_load)} packages.")
 
             # some packages may go to same place, determine the total set of locations for our trip
-            unique_locations = get_unique_locations(package_load)
+            unique_locations = get_unique_locations(package_load, location_strings)
 
             # now get the list of location coordinates that match these addresses in the original adj_matrix
             indices = get_indices_for_locations(unique_locations)
+            indices.insert(0, 0) # HUB will always be a destination
 
             # create a sub matrix of distances for all the locations needed for this batch of packages
             sub_matrix = extract_submatrix(adj_matrix, indices)
             tour, total_cost, hop_times, tour_cost = nearest_neighbor_algo.run(sub_matrix) # calculate the tour using the sub matrix
+
+            tour_global = []
+            for hop in tour:
+                tour_global.append(indices[hop])
+
             arrival_times, arrival_times_str = get_arrival_times(hop_times)
 
-            driver.add_start_time(arrival_times[-1])
+            driver.add_start_time(arrival_times[-1]) # the hub arrival time is the last arrival time of the tour
 
-            print(f"\t\ttour: {tour} tour length: {len(tour)}")
+            print(f"\t\ttour: {tour_global} tour length: {len(tour)}")
             print(f"\t\ttour_cost: {tour_cost} tour_cost length: {len(tour_cost)}")
             print(f"\t\ttotal_cost: {total_cost}")
             print(f"\t\tarrival_times_str: {arrival_times_str} len: {len(arrival_times_str)}")
+
+            events = []
+            pickup = tour_global.pop(0)
+            pickup_arrival_time = arrival_times.pop(0)
+            pickup_arrival_time_str = arrival_times_str.pop(0)
+
+
+            for package in package_load:
+                events.append(PackageEvent(package.id_unique, PackageEventType.pickup, pickup_arrival_time, location_strings[0]))
+
+            for i, destination_index in enumerate(tour_global):
+                if destination_index == 0:
+                    continue
+
+                destination_string = location_strings[destination_index]
+                print(f"package delivered to index: {destination_index} of address: {destination_string}")
+
+                packages = get_packages_with_matching_destination(destination_string, package_load)
+                if len(packages) == 0:
+                    print("zero!")
+                for package in packages:
+                    events.append(PackageEvent(package.id_unique, PackageEventType.delivery, arrival_times[i], destination_string))
+
+
+            for event in events:
+                print(f"event: {event}")
