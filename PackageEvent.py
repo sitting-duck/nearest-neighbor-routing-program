@@ -1,8 +1,5 @@
-from datetime import datetime
 from enum import Enum
-
 import TimeUtils
-
 
 class PackageEventType(Enum):
     pickup = 0
