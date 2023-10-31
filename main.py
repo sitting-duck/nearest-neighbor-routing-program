@@ -3,21 +3,21 @@
 # Start Date: Nov 1, 2019
 # Program Mentor: Denece Meyer, (385) 428-6184, Mountain Time
 # email: athar16@my.wgu.edu, ashley.tharp@gmail.com
+
 import TimeUtils
 from CSVParser_Packages import CSVParser_Packages  # authored by student
 from CSVParser_Distances import CSVParser_Distances  # authored by student
 from CSVParser_Locations import CSVParser_Locations  # authored by student
-from EventManager import EventManager
+from EventManager import EventManager  # authored by student
 from HashTable import HashTable  # authored by student
 from Location import Location  # authored by student
 from NearestNeighbor import NearestNeighbor  # authored by student
 from Driver import Driver  # authored by student
+from PackageManager import PackageManager
+from TimeUtils import *  # authored by student
 
-from PackageEvent import PackageEventType, PackageEvent
-from TimeUtils import *
 
-
-def InitData():
+def init_data():
     # init packages
     packages_parser = CSVParser_Packages("packages.csv")
     package_tuples = packages_parser.parse2()  # tuple is: (package_id, package_object)
@@ -39,27 +39,6 @@ def InitData():
     adjacency_matrix = distances_parser.create_adjacency_matrix(location_strings)
 
     return my_hash_table, adjacency_matrix, locations, location_strings
-
-
-def get_sub_matrix_for_packages(adj_matrix, packages):
-    pass
-    # address_strings = []
-    # for package in packages:
-    #     address_strings.append(package.get_address_string())
-
-    # unique_address_list = list(set(address_strings)) # use set to create a list of only the unique addresses
-
-    # locations = []
-    # for i in range(num_locations-1):
-    #     new_location = Location(location_strings[i])
-    #     #print(f"new_location: {new_location}")
-    #     #     for j in range(num_locations-1):
-    #         address = location_strings[j]
-    #         #print(f"to_location: {address}")
-    #         distance = adjacency_matrix[i][j]
-    #         #print(f"distance: {distance}")
-    #         new_location.add_distance(address, distance)
-    #     locations.append(new_location)
 
 
 def get_submatrix(matrix, start_row, end_row, start_col, end_col):
@@ -98,20 +77,10 @@ def get_unique_locations(package_load, location_strings):
     return unique_locations
 
 
-def get_arrival_times(hop_times, start_time):
-    arrival_times = [start_time]
-    for hop_time in hop_times:
-        delta = timedelta(hours=hop_time)
-        new_time = arrival_times[-1] + delta
-        # print(f"hop_time: {hop_time} delta: {delta} new_time: {get_time_string(new_time)}")
-        arrival_times.append(new_time)
-
-    arrival_times_str = [get_time_string(time) for time in arrival_times]
-    # arrival_times_str = arrival_times_str[1:]
-    return arrival_times, arrival_times_str
 
 
-def get_drivers(num_drivers):
+
+def init_drivers(num_drivers):
     drivers = []
     for driver_id_num in range(0, num_drivers):
         driver = Driver(driver_id_num, earliest_start_time)
@@ -120,23 +89,27 @@ def get_drivers(num_drivers):
 
 
 if __name__ == '__main__':
+
+    # initialize variables
     max_pkg_load_size_per_truck = 16  # max num packages a truck can hold
-    num_trucks = 3
-    num_drivers = 2
-    max_miles = 140
-    earliest_start_time = get_time("8:00am")
-    avg_speed_mph = 18
-    avg_num_pkgs_per_day = 40
+    num_trucks = 3   # 3 trucks total
+    num_drivers = 2  # two drivers max
+    max_miles = 140 # the two trucks combined cannot travel more than 140 miles
+    earliest_start_time = get_time("8:00am") # earliest start time
+    avg_speed_mph = 18  # avg speed. Packing/unpacking truck takes no time.
+    avg_num_pkgs_per_day = 40 # num packages to deliver each day
 
-    packages_hash_table, adj_matrix, locations, location_strings = InitData()
+    packages_hash_table, adj_matrix, locations, location_strings = init_data() # init all data structures
+    package_manager = PackageManager(packages_hash_table) # init package manager
 
-    start_time = earliest_start_time
-    nearest_neighbor_algo = NearestNeighbor(avg_speed_mph)
+    start_time = earliest_start_time # create earliest start time as time object
+    nearest_neighbor_algo = NearestNeighbor(avg_speed_mph) # initialize nearest neighbor implementation
 
-    driver_end_times = []
-    drivers = get_drivers(num_drivers)
+    driver_end_times = [] # when each driver returns to HUB, end of drive time will be timestamped
+    drivers = init_drivers(num_drivers) # create drivers
+    event_manager = EventManager() # create event manager
 
-    while packages_hash_table.how_many_packages() > 0:
+    while package_manager.how_many_packages() > 0:  # continue processing until all packages are processed
 
         # sort drivers by last start time
         drivers = sorted(drivers, key=lambda driver: driver.get_last_start_time())
@@ -145,17 +118,20 @@ if __name__ == '__main__':
             print(driver.__str__(), end=' ')
         print()
 
+        # get a new batch of packages to drivers in the order they arrive
         for driver in drivers:
 
             # check if there are any more packages
-            how_many_packages = int(packages_hash_table.how_many_packages())
+            how_many_packages = int(package_manager.how_many_packages())
             if how_many_packages == 0:
                 break
 
             # if there are still some, get next batch of packages
-            package_load = packages_hash_table.get_n_packages(min(max_pkg_load_size_per_truck, how_many_packages))
-            new_pickup_time = driver.get_last_start_time()
-            new_pickup_time_str = TimeUtils.get_time_string(new_pickup_time)
+            load_size = min(max_pkg_load_size_per_truck, how_many_packages) # decide whether to get 16 or all remaining
+            package_load = package_manager.get_packages(load_size)  # get load of determined size
+            new_pickup_time = driver.get_last_start_time()          # new pickup time is the beginning of the next drive session
+
+            new_pickup_time_str = TimeUtils.get_time_string(new_pickup_time) # new pickup time as string
             print(f"\tdriver {driver.idNum} got: {len(package_load)} packages at: {new_pickup_time_str}")
 
             # for package in package_load:
@@ -177,31 +153,37 @@ if __name__ == '__main__':
             for hop in tour:
                 tour_global.append(indices[hop])
 
-            arrival_times, arrival_times_str = get_arrival_times(hop_times, new_pickup_time)
+            # each arrival at each location now has an arrival time, these are in order chronologically
+            arrival_times, arrival_times_str = TimeUtils.get_arrival_times(hop_times, new_pickup_time)
 
             driver.add_start_time(arrival_times[-1])  # the hub arrival time is the last arrival time of the tour
 
-            print(f"\t\ttour: {tour_global} tour length: {len(tour)}")
-            print(f"\t\ttour_cost: {tour_cost} tour_cost length: {len(tour_cost)}")
-            print(f"\t\ttotal_cost: {total_cost}")
-            print(f"\t\tarrival_times_str: {arrival_times_str} len: {len(arrival_times_str)}")
+            #print(f"\t\ttour: {tour_global} tour length: {len(tour)}")
+            #print(f"\t\ttour_cost: {tour_cost} tour_cost length: {len(tour_cost)}")
+            #print(f"\t\ttotal_cost: {total_cost}")
+            #print(f"\t\tarrival_times_str: {arrival_times_str} len: {len(arrival_times_str)}")
 
-            event_manager = EventManager(tour_global, package_load, location_strings, arrival_times)
+            # for each hop in a tour we will create an event.
+            event_manager.add_tour(tour_global, package_load, location_strings, arrival_times)
 
-            while True:
-                # Get packageID from the user
-                package_id = input("Enter the packageID (or 'quit' to exit): ")
+    event_manager.print_all_events()
 
-                # Exit condition
-                if package_id.lower() == 'quit':
-                    break
+    while True:
+        # Get packageID from the user
+        package_id = input("Enter the packageID (or 'quit' to exit): ")
 
-                # Get time from the user
-                time = TimeUtils.input_valid_time()
-                time_str = TimeUtils.get_time_string(time)
-                status = event_manager.get_package_status_at_time(package_id, time)
+        # Exit condition
+        if package_id.lower() == 'quit':
+            break
 
-                # Now you can process or store the packageID and time as required
-                print(f"package: {package_id} at time: {time_str} is: {status}")
+        # Get time from the user
+        time = TimeUtils.input_valid_time()
+        time_str = TimeUtils.get_time_string(time)
+        status = event_manager.get_package_status_at_time(package_id, time)
 
-            print("Goodbye!.")
+        # Now you can process or store the packageID and time as required
+        print(f"package: {package_id} at time: {time_str} is: {status}")
+
+        event_manager.print_all_events_for_package(package_id)
+
+    print("Goodbye!.")
