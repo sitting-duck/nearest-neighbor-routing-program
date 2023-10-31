@@ -13,6 +13,13 @@ class PackageManager:
         """
         self.packages_hash_table = packages_hash_table
 
+    def get_unique_locations(self, package_load, location_strings):
+        unique_locations = []
+        for package in package_load:
+            unique_locations.append(package.get_address_string())
+        unique_locations = list(set(unique_locations))
+        return unique_locations
+
     def how_many_packages(self):
         """
         Retrieve the total number of packages in the manager's hash table.

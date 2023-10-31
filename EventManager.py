@@ -1,8 +1,9 @@
 import TimeUtils
 from PackageEvent import *
+from MatrixUtils import *
 class EventManager:
 
-    def __init__(self):
+    def __init__(self, package_manager, max_pkg_load_size_per_truck, location_strings, adj_matrix, nearest_neighbor_algo, drivers):
         """
        Initialize an instance of the EventManager class.
 
@@ -13,8 +14,64 @@ class EventManager:
        """
         self.events = []
 
-    def create_events(self, package_manager, ):
-        pass
+        while package_manager.how_many_packages() > 0:  # continue processing until all packages are processed
+
+            # sort drivers by last start time
+            drivers = sorted(drivers, key=lambda driver: driver.get_last_start_time())
+            print("\ndrivers sorted by HUB arrival time: ", end='')
+            for driver in drivers:
+                print(driver.__str__(), end=' ')
+            print()
+
+            # get a new batch of packages to drivers in the order they arrive
+            for driver in drivers:
+
+                # check if there are any more packages
+                how_many_packages = int(package_manager.how_many_packages())
+                if how_many_packages == 0:
+                    break
+
+                # if there are still some, get next batch of packages
+                load_size = min(max_pkg_load_size_per_truck,
+                                how_many_packages)  # decide whether to get 16 or all remaining
+                package_load = package_manager.get_packages(load_size)  # get load of determined size
+                new_pickup_time = driver.get_last_start_time()  # new pickup time is the beginning of the next drive session
+
+                new_pickup_time_str = TimeUtils.get_time_string(new_pickup_time)  # new pickup time as string
+                print(f"\tdriver {driver.idNum} got: {len(package_load)} packages at: {new_pickup_time_str}")
+
+                # for package in package_load:
+                #    print(f"package: {package}")
+
+                # some packages may go to same place, determine the total set of locations for our trip
+                unique_locations = package_manager.get_unique_locations(package_load, location_strings)
+
+                # now get the list of location coordinates that match these addresses in the original adj_matrix
+                indices = get_indices_for_locations(unique_locations, location_strings)
+                indices.insert(0, 0)  # HUB will always be a destination
+
+                # create a sub matrix of distances for all the locations needed for this batch of packages
+                sub_matrix = extract_submatrix(adj_matrix, indices)
+                tour, total_cost, hop_times, tour_cost = nearest_neighbor_algo.run(
+                    sub_matrix)  # calculate the tour using the sub matrix
+
+                tour_global = []
+                for hop in tour:
+                    tour_global.append(indices[hop])
+
+                # each arrival at each location now has an arrival time, these are in order chronologically
+                arrival_times, arrival_times_str = TimeUtils.get_arrival_times(hop_times, new_pickup_time)
+
+                driver.add_start_time(arrival_times[-1])  # the hub arrival time is the last arrival time of the tour
+
+                # print(f"\t\ttour: {tour_global} tour length: {len(tour)}")
+                # print(f"\t\ttour_cost: {tour_cost} tour_cost length: {len(tour_cost)}")
+                # print(f"\t\ttotal_cost: {total_cost}")
+                # print(f"\t\tarrival_times_str: {arrival_times_str} len: {len(arrival_times_str)}")
+
+                # for each hop in a tour we will create an event.
+                self.add_tour(tour_global, package_load, location_strings, arrival_times)
+
     def add_tour(self, tour_global, package_load, location_strings, arrival_times):
         """
         Initialize an object with events based on packages and their respective delivery locations and times.
