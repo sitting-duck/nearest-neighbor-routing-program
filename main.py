@@ -84,6 +84,11 @@ if __name__ == '__main__':
         print("Choose an option from below or enter 'quit' to exit the program. ")
         print("1: see a package status at a a particular time")
         print("2: see all events within a certain time range")
+        print("3: see all pickup events")
+        print("4: see all delivery events")
+        print("5: see status of all packages at a particular time")
+        print("6: see all times HUB was visited")
+        print("7: print all events")
 
         option = input("Enter an option: ")
 
@@ -121,5 +126,25 @@ if __name__ == '__main__':
             events_in_time_frame = event_manager.get_all_events_in_timeframe(start_time, end_time)
             for event in events_in_time_frame:
                 print(f"event: {event}")
+        elif option == "3":
+            pickups = event_manager.get_all_pickup_events()
+            for event in pickups:
+                print(f"event: {event}")
+        elif option == "4":
+            deliveries = event_manager.get_all_delivery_events()
+            for event in deliveries:
+                print(f"event: {event}")
+        elif option == "5":
+            time = TimeUtils.input_valid_time()
+            time_str = TimeUtils.get_time_string(time)
+            for package_id in package_id_cache:
+                status = event_manager.get_package_status_at_time(package_id, time)
+                print(f"{time_str} package: {package_id} status: {status}")
+        elif option == "6":
+            times = event_manager.get_times_hub_was_visited()
+            print(times)
+        elif option == "7":
+            event_manager.print_all_events()
+
 
     print("Goodbye!")

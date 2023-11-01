@@ -1,4 +1,4 @@
-
+import TimeUtils
 from PackageEvent import *
 from MatrixUtils import *
 class EventManager:
@@ -149,7 +149,7 @@ class EventManager:
         elif last_known_status == PackageEventType.delivery:
             return f"Delivered at {last_known_time}"
         else:
-            return "Unknown"
+            return "At the HUB"
 
     def get_packages_with_matching_destination(self, destination_string, package_load):
         """
@@ -184,6 +184,27 @@ class EventManager:
 
     def get_all_events(self):
         return self.events
+
+    def get_all_pickup_events(self):
+        pickups = []
+        for event in self.events:
+            if event.event_type == PackageEventType.pickup:
+                pickups.append(event)
+        return pickups
+
+    def get_times_hub_was_visited(self):
+        times = set()
+        pickups = self.get_all_pickup_events()
+        for pickup in pickups:
+            if pickup.time not in times:
+                times.add(TimeUtils.get_time_string(pickup.time))
+        return times
+    def get_all_delivery_events(self):
+        deliveries = []
+        for event in self.events:
+            if event.event_type == PackageEventType.delivery:
+                deliveries.append(event)
+        return deliveries
 
     def print_all_events_for_package(self, package_id):
         """
