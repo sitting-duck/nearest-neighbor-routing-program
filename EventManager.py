@@ -1,4 +1,4 @@
-import TimeUtils
+
 from PackageEvent import *
 from MatrixUtils import *
 class EventManager:
@@ -7,7 +7,8 @@ class EventManager:
         """
        Initialize an instance of the EventManager class.
 
-       The EventManager class is responsible for managing and storing events.
+       The EventManager class is responsible for managing and storing events. Picking up a package is an event, and
+       dropping off a package is an event. All events are timestamped.
 
        Attributes:
        - events (list): A list to store events associated with the EventManager instance.
@@ -181,6 +182,9 @@ class EventManager:
         for event in self.events:
             print(f"\t\t\t\tevent: {event}")
 
+    def get_all_events(self):
+        return self.events
+
     def print_all_events_for_package(self, package_id):
         """
         Print all events associated with a specific package ID.
@@ -194,3 +198,9 @@ class EventManager:
             if event.package_id == package_id:
                 print(f"\t\t\t\tevent: {event}")
 
+    def get_all_events_in_timeframe(self, begin_time, end_time):
+        in_timeframe = []
+        for event in self.events:
+            if event.time >= begin_time and event.time <= end_time:
+                in_timeframe.append(event)
+        return in_timeframe

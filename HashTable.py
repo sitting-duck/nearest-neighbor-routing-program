@@ -135,7 +135,8 @@ class HashTable:
 
     def get_n_packages(self, num):
         """
-        Fetch a specified number of package entries from the hash table.
+        Fetch a specified number of package entries from the hash table. Note: the fetched packages will be
+        removed from the array internally.
 
         Parameters:
         - num (int): The number of packages to fetch.
@@ -165,3 +166,17 @@ class HashTable:
         - int: The total number of packages.
         """
         return self.num_packages
+
+    def check_id_exists(self, id):
+        for package in self.table:
+            if package.id_unique == id:
+                return True
+        return False
+
+    def get_copy_all_packages(self):
+        howmany = len(self.table)
+        packages = self.table[0:howmany]
+        package_list = []
+        for package in packages:
+            package_list.append(package[0][1])
+        return package_list

@@ -1,17 +1,17 @@
+from CSVParser_Packages import CSVParser_Packages  # authored by student
+from HashTable import HashTable  # authored by student
 
 class PackageManager:
 
-    def __init__(self, packages_hash_table):
+    def __init__(self):
         """
-        Initialize an instance of the class.
-
-        Parameters:
-        - packages_hash_table (object): A hash table instance containing packages.
-
-        Attributes:
-        - packages_hash_table (object): The provided hash table is stored for further operations.
         """
-        self.packages_hash_table = packages_hash_table
+        packages_parser = CSVParser_Packages("packages.csv")
+        package_tuples = packages_parser.parse2()  # tuple is: (package_id, package_object)
+        my_hash_table = HashTable(len(package_tuples))
+        for package_tuple in package_tuples:
+            my_hash_table.add(package_tuple[0], package_tuple[1])
+        self.packages_hash_table = my_hash_table
 
     def get_unique_locations(self, package_load, location_strings):
         unique_locations = []
@@ -29,6 +29,15 @@ class PackageManager:
         """
         return self.packages_hash_table.how_many_packages()
 
+    def get_all_packages(self):
+        """
+        Fetch all packages from the manager's hash table. Note, this will empty the array of packages internally.
+
+        Returns:
+        - list: A list containing the package objects.
+        """
+        howmany = self.packages_hash_table.how_many_packages()
+        return self.packages_hash_table.get_n_packages(howmany)
     def get_packages(self, howmany):
         """
         Fetch a specified number of packages from the manager's hash table.
@@ -51,8 +60,35 @@ class PackageManager:
         Returns:
         - bool: True if the package exists, False otherwise.
         """
+        # try:
+        #     if self.packages_hash_table.get(package_id):
+        #         print(f"package with id: {package_id} does exist")
+        #         return True
+        #     else:
+        #         print(f"package with id {package_id} does NOT exist")
+        #         return False
+        # except:
+        #     print(f"package with id {package_id} does NOT exist")
+        #     return False
+        #
+        # return True if self.packages_hash_table.get(package_id) else False
+        if self.packages_hash_table.check_id_exists(package_id):
+            print(f"package with id: {package_id} exists.")
+            return True
+        else:
+            print(f"package with id: {package_id} does NOT exist.")
 
-        return True if self.packages_hash_table.get(package_id) else False
+    def print_all_package_ids(self):
+        packages = self.packages_hash_table.get_copy_all_packages()
+        for package in packages:
+            print(package.id_unique, end=" ")
+
+    def get_all_package_ids(self):
+        ids = []
+        packages = self.packages_hash_table.get_copy_all_packages()
+        for package in packages:
+            ids.append(package.id_unique)
+        return ids
 
     def input_valid_package_id(self):
         """
