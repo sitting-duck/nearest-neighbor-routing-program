@@ -1,6 +1,11 @@
 from datetime import datetime, timedelta
 
-
+def get_time_plus_hours(time, hours):
+    """
+    time: a datetime object
+    hours: an integer representing the number of hours to add to the time
+    """
+    return time + timedelta(hours=hours)
 def get_time(str):
     """
     str: a string in the format: "9:00am", "5:30pm" etc. Use civilian time and am/pm, not military time.

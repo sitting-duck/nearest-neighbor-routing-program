@@ -140,6 +140,12 @@ if __name__ == '__main__':
             for package_id in package_id_cache:
                 status = event_manager.get_package_status_at_time(package_id, time)
                 print(f"{time_str} package: {package_id} status: {status}")
+
+            print("Driver mileage at time: ")
+            for driver in drivers:
+                mileage_at_time = driver.get_mileage_at_time(time)
+                print(f"\t{time_str} driver: {driver.idNum} mileage: {mileage_at_time}"
+                      )
         elif option == "6":
             times = event_manager.get_times_hub_was_visited()
             print(times)
