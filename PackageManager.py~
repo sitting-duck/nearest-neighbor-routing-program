@@ -96,7 +96,7 @@ class PackageManager:
         may not work
         :return:
         """
-        return self.package_cache
+        return self.package_cache.get_copy_all_packages()
 
     def input_valid_package_id(self):
         """

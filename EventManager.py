@@ -18,6 +18,7 @@ class EventManager:
        """
         self.events = []
         self.drivers = drivers
+        self.package_manager = package_manager
 
         while package_manager.how_many_packages() > 0:  # continue processing until all packages are processed
 
@@ -78,9 +79,9 @@ class EventManager:
                 # print(f"\t\tarrival_times_str: {arrival_times_str} len: {len(arrival_times_str)}")
 
                 # for each hop in a tour we will create an event.
-                self.add_tour(tour_global, package_load, location_strings, arrival_times)
+                self.add_tour(tour_global, package_load, location_strings, arrival_times, driver.idNum)
 
-    def add_tour(self, tour_global, package_load, location_strings, arrival_times):
+    def add_tour(self, tour_global, package_load, location_strings, arrival_times, driver_id):
         """
         Initialize an object with events based on packages and their respective delivery locations and times.
 
@@ -103,8 +104,7 @@ class EventManager:
         pickup_arrival_time = arrival_times.pop(0)
 
         for package in package_load:
-            self.events.append(
-                PackageEvent(package.id_unique, PackageEventType.pickup, pickup_arrival_time, location_strings[0]))
+            self.events.append(PackageEvent(package.id_unique, PackageEventType.pickup, pickup_arrival_time, location_strings[0], driver_id))
 
         for i, destination_index in enumerate(tour_global):
             if destination_index == 0:
@@ -116,8 +116,7 @@ class EventManager:
             packages = self.get_packages_with_matching_destination(destination_string, package_load)
 
             for package in packages:
-                self.events.append(
-                    PackageEvent(package.id_unique, PackageEventType.delivery, arrival_times[i], destination_string))
+                self.events.append(PackageEvent(package.id_unique, PackageEventType.delivery, arrival_times[i], destination_string, driver_id))
 
     def get_all_events_up_to_time(self, query_time):
         # Sort events by time for accurate status determination
@@ -135,8 +134,20 @@ class EventManager:
         """
         events = self.get_all_events_up_to_time(query_time)
 
+    def get_package_bundles_at_time(self, query_time, package_id_cache):
+        at_hub = []
+        en_route = []
+        delivered_with_time = []
 
-
+        for package_id in package_id_cache:
+            status, driver_id, event_time = self.get_package_status_at_time(package_id, query_time)
+            if status == "At the HUB":
+                at_hub.append(package_id)
+            elif status == "En Route":
+                en_route.append(package_id)
+            elif status.startswith("Delivered"):
+                delivered_with_time.append((package_id, event_time, driver_id))
+        return at_hub, en_route, delivered_with_time
         
     def get_package_status_at_time(self, package_id, query_time):
         """
@@ -159,23 +170,25 @@ class EventManager:
         events = self.events
         sorted_events = sorted(events, key=lambda e: e.time)
 
+        driver_id = -1
         for event in sorted_events:
             # If the event is for the given package and occurred before or exactly at the query time
             if event.package_id == package_id and event.time <= query_time:
                 # Update the last known status
                 last_known_status = event.event_type
                 last_known_time = TimeUtils.get_time_string(event.time)
+                driver_id = event.driver_id
 
         if query_time < TimeUtils.get_time("8:00am"):
-            return "At the HUB"
+            return "At the HUB", driver_id
 
         # Check the value of last known status and return the status string
         if last_known_status == PackageEventType.pickup:
-            return "En Route"
+            return "En Route", driver_id, last_known_time
         elif last_known_status == PackageEventType.delivery:
-            return f"Delivered at {last_known_time}"
+            return f"Delivered at {last_known_time}", driver_id, last_known_time
         else:
-            return "At the HUB"
+            return "At the HUB", driver_id, last_known_time
 
     def get_packages_with_matching_destination(self, destination_string, package_load):
         """

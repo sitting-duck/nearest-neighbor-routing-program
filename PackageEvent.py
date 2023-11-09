@@ -6,11 +6,12 @@ class PackageEventType(Enum):
     delivery = 1
 class PackageEvent():
 
-    def __init__(self, package_id, event_type, time, address):
+    def __init__(self, package_id, event_type, time, address, driver_id):
         self.package_id = package_id
         self.event_type = event_type
         self.time = time
         self.address = address
+        self.driver_id = driver_id
 
     def __str__(self):
         """
@@ -24,7 +25,7 @@ class PackageEvent():
         elif self.event_type == PackageEventType.delivery:
             event_type_str = "delivery"
 
-        return f'package_id: {self.package_id} event_type: {event_type_str} time: {time_str}'
+        return f'package_id: {self.package_id} event_type: {event_type_str} time: {time_str} driverID: {self.driver_id}'
 
     def __repr__(self):
         """

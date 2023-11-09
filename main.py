@@ -86,9 +86,10 @@ if __name__ == '__main__':
         print("2: see all events within a certain time range")
         print("3: see all pickup events")
         print("4: see all delivery events")
-        print("5: see status of all packages at a particular time")
+        print("5: see status of all packages at a particular time (long output)")
         print("6: see all times HUB was visited")
         print("7: print all events")
+        print("8: see status of all packages at a particular time (short output)")
 
         option = input("Enter an option: ")
 
@@ -138,8 +139,11 @@ if __name__ == '__main__':
             time = TimeUtils.input_valid_time()
             time_str = TimeUtils.get_time_string(time)
             for package_id in package_id_cache:
-                status = event_manager.get_package_status_at_time(package_id, time)
-                print(f"{time_str} package: {package_id} status: {status}")
+                status, driver_id, event_time = event_manager.get_package_status_at_time(package_id, time)
+                if driver_id == -1:
+                    print(f"{time_str} package: {package_id} status: {status}")
+                else:
+                    print(f"{time_str} package: {package_id} status: {status} driver_id: {driver_id}")
 
             print("Driver mileage at time: ")
             for driver in drivers:
@@ -151,6 +155,15 @@ if __name__ == '__main__':
             print(times)
         elif option == "7":
             event_manager.print_all_events()
+        elif option == "8":
+            time = TimeUtils.input_valid_time()
+            time_str = TimeUtils.get_time_string(time)
+            at_hub, en_route, delivered_with_time = event_manager.get_package_bundles_at_time(time, package_id_cache)
+            print(f"at hub: {at_hub}")
+            print(f"en route: {en_route}")
+            print(f"delivered:")
+            for item in delivered_with_time:
+                print(f"package id: {item[0]} delivery time: {item[1]} driverID: {item[2]}")
 
 
     print("Goodbye!")
