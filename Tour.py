@@ -32,5 +32,11 @@ class Tour:
                 break
         return current_mileage
 
+    def get_total_mileage(self):
+        current_mileage = 0
+        for i in range(len(self.hop_times)):
+            current_mileage += self.tour_cost[i]
+        return current_mileage
+
     def __lt__(self, other):
         return self.hop_times[0] < other.hop_times[0]

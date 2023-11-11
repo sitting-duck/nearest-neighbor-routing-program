@@ -148,22 +148,33 @@ if __name__ == '__main__':
             print("Driver mileage at time: ")
             for driver in drivers:
                 mileage_at_time = driver.get_mileage_at_time(time)
-                print(f"\t{time_str} driver: {driver.idNum} mileage: {mileage_at_time}"
-                      )
+                print(f"\t{time_str} driver: {driver.idNum} mileage: {mileage_at_time}")
         elif option == "6":
             times = event_manager.get_times_hub_was_visited()
             print(times)
         elif option == "7":
             event_manager.print_all_events()
+
+            print("Total Driver Mileage: ")
+            for driver in drivers:
+                mileage = driver.get_total_mileage()
+                print(f"\t driver: {driver.idNum} mileage: {mileage}")
+
         elif option == "8":
             time = TimeUtils.input_valid_time()
             time_str = TimeUtils.get_time_string(time)
             at_hub, en_route, delivered_with_time = event_manager.get_package_bundles_at_time(time, package_id_cache)
             print(f"at hub: {at_hub}")
+
             print(f"en route: {en_route}")
             print(f"delivered:")
             for item in delivered_with_time:
                 print(f"package id: {item[0]} delivery time: {item[1]} driverID: {item[2]}")
+
+            print("Driver mileage at time: ")
+            for driver in drivers:
+                mileage_at_time = driver.get_mileage_at_time(time)
+                print(f"\t{time_str} driver: {driver.idNum} mileage: {mileage_at_time}")
 
 
     print("Goodbye!")

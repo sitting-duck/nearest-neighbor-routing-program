@@ -25,7 +25,8 @@ class PackageEvent():
         elif self.event_type == PackageEventType.delivery:
             event_type_str = "delivery"
 
-        return f'package_id: {self.package_id} event_type: {event_type_str} time: {time_str} driverID: {self.driver_id}'
+        #return f'package_id: {self.package_id} event_type: {event_type_str} time: {time_str} driverID: {self.driver_id}'
+        return f'{event_type_str} for package {self.package_id} at {time_str} by driver: {self.driver_id}'
 
     def __repr__(self):
         """

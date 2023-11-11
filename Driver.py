@@ -24,3 +24,9 @@ class Driver:
         for tour in self.tours:
             total_mileage += tour.get_mileage_at_time(query_time)
         return total_mileage
+
+    def get_total_mileage(self):
+        total_mileage = 0
+        for tour in self.tours:
+            total_mileage += tour.get_total_mileage()
+        return total_mileage
