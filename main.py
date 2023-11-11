@@ -75,9 +75,6 @@ if __name__ == '__main__':
     drivers = init_drivers(num_drivers) # create drivers
 
     event_manager = EventManager(package_manager, max_pkg_load_size_per_truck, location_strings, adj_matrix, nearest_neighbor_algo, drivers)
-    #event_test_manager = TestEventManager(event_manager, package_manager)
-
-    #event_manager.print_all_events()
 
     while True:
         # Get packageID from the user
@@ -100,11 +97,16 @@ if __name__ == '__main__':
             print("Error: enter a number value for option or 'quit' to exit. Try again.")
             continue
 
+        if int(option) < 1 or int(option) > 8:
+            print("Error: enter a number value for option or 'quit' to exit. Try again.")
+            continue
+
         if option == "1":
             package_id = input("Enter the packageID (or 'quit' to exit): ")
             if package_id.isdigit() == False:
                 print("Error: package id must be all digits and represent a package that exists. Try again.")
                 continue
+
             if package_id.lower() == 'quit':
                 break
 
