@@ -1,12 +1,17 @@
-import TimeUtils
 from PackageEvent import *
 from MatrixUtils import *
 from Tour import Tour
 
 
 class EventManager:
+    """
+    Class responsible for managing and orchestrating package delivery events.
+    This includes planning tours for drivers, tracking package pick-ups and deliveries,
+    and managing the overall event timeline.
+    """
 
-    def __init__(self, package_manager, max_pkg_load_size_per_truck, location_strings, adj_matrix, nearest_neighbor_algo, drivers):
+    def __init__(self, package_manager, max_pkg_load_size_per_truck, location_strings, adj_matrix,
+                 nearest_neighbor_algo, drivers):
         """
        Initialize an instance of the EventManager class.
 
@@ -47,9 +52,6 @@ class EventManager:
                 new_pickup_time_str = TimeUtils.get_time_string(new_pickup_time)  # new pickup time as string
                 print(f"\tdriver {driver.idNum} got: {len(package_load)} packages at: {new_pickup_time_str}")
 
-                # for package in package_load:
-                #    print(f"package: {package}")
-
                 # some packages may go to same place, determine the total set of locations for our trip
                 unique_locations = package_manager.get_unique_locations(package_load, location_strings)
 
@@ -59,7 +61,8 @@ class EventManager:
 
                 # create a sub matrix of distances for all the locations needed for this batch of packages
                 sub_matrix = extract_submatrix(adj_matrix, indices)
-                tour, total_cost, hop_times, tour_cost = nearest_neighbor_algo.run(sub_matrix)  # calculate the tour using the sub matrix
+                tour, total_cost, hop_times, tour_cost = nearest_neighbor_algo.run(
+                    sub_matrix)  # calculate the tour using the sub matrix
 
                 tour_global = []
                 for hop in tour:
@@ -104,21 +107,34 @@ class EventManager:
         pickup_arrival_time = arrival_times.pop(0)
 
         for package in package_load:
-            self.events.append(PackageEvent(package.id_unique, PackageEventType.pickup, pickup_arrival_time, location_strings[0], driver_id))
+            self.events.append(
+                PackageEvent(package.id_unique, PackageEventType.pickup, pickup_arrival_time, location_strings[0],
+                             driver_id))
 
         for i, destination_index in enumerate(tour_global):
             if destination_index == 0:
                 continue
 
             destination_string = location_strings[destination_index]
-            #print(f"\t\t\tpackage {package.id_unique} delivered to index: {destination_index} of address: {destination_string}")
+            # print(f"\t\t\tpackage {package.id_unique} delivered to index: {destination_index} of address: {destination_string}")
 
             packages = self.get_packages_with_matching_destination(destination_string, package_load)
 
             for package in packages:
-                self.events.append(PackageEvent(package.id_unique, PackageEventType.delivery, arrival_times[i], destination_string, driver_id))
+                self.events.append(
+                    PackageEvent(package.id_unique, PackageEventType.delivery, arrival_times[i], destination_string,
+                                 driver_id))
 
     def get_all_events_up_to_time(self, query_time):
+        """
+        Retrieve all events that have occurred up to a specific time.
+
+        Parameters:
+        - query_time (datetime): The time up to which events are to be retrieved.
+
+        Returns:
+        - list: A list of events that occurred up to the specified time.
+        """
         # Sort events by time for accurate status determination
         events = self.events
         sorted_events = sorted(events, key=lambda e: e.time)
@@ -126,15 +142,17 @@ class EventManager:
         events_before_time = [event for event in sorted_events if event.time <= query_time]
         return events_before_time
 
-    def get_all_truck_mileage_at_time(self, query_time):
-        """
-
-        :param query_time:
-        :return:
-        """
-        events = self.get_all_events_up_to_time(query_time)
-
     def get_package_bundles_at_time(self, query_time, package_id_cache):
+        """
+        Determine the status of a specific package at a given time.
+
+        Parameters:
+        - package_id (int): The ID of the package.
+        - query_time (datetime): The time at which the status is to be determined.
+
+        Returns:
+        - str: The status of the package at the specified time.
+        """
         at_hub = []
         en_route = []
         delivered_with_time = []
@@ -148,7 +166,7 @@ class EventManager:
             elif status.startswith("Delivered"):
                 delivered_with_time.append((package_id, event_time, driver_id))
         return at_hub, en_route, delivered_with_time
-        
+
     def get_package_status_at_time(self, package_id, query_time):
         """
         Determine the status of a package based on the provided events up to a certain time.
@@ -190,7 +208,8 @@ class EventManager:
         else:
             return "At the HUB", driver_id, last_known_time
 
-    def get_packages_with_matching_destination(self, destination_string, package_load):
+    @staticmethod
+    def get_packages_with_matching_destination(destination_string, package_load):
         """
             Retrieve packages from the provided package load whose destination matches the given destination string.
 
@@ -203,7 +222,7 @@ class EventManager:
 
             Note:
             It's assumed that the package object has a method get_address_string() that returns the destination (address) of the package as a string.
-            """
+        """
         packages = []
         for package in package_load:
             address_string = package.get_address_string()
@@ -222,9 +241,21 @@ class EventManager:
             print(f"\t\t\t\tevent: {event}")
 
     def get_all_events(self):
+        """
+        Retrieve all events.
+
+        Returns:
+        - list: A list of all events.
+        """
         return self.events
 
     def get_all_pickup_events(self):
+        """
+        Retrieve all pickup events.
+
+        Returns:
+        - list: A list of all pickup events.
+        """
         pickups = []
         for event in self.events:
             if event.event_type == PackageEventType.pickup:
@@ -232,13 +263,26 @@ class EventManager:
         return pickups
 
     def get_times_hub_was_visited(self):
+        """
+        Retrieve the times when the hub was visited.
+
+        Returns:
+        - list: A list of times when the hub was visited.
+        """
         times = set()
         pickups = self.get_all_pickup_events()
         for pickup in pickups:
             if pickup.time not in times:
                 times.add(TimeUtils.get_time_string(pickup.time))
         return times
+
     def get_all_delivery_events(self):
+        """
+        Retrieve all delivery events.
+
+        Returns:
+        - list: A list of all delivery events.
+        """
         deliveries = []
         for event in self.events:
             if event.event_type == PackageEventType.delivery:
@@ -259,8 +303,18 @@ class EventManager:
                 print(f"\t\t\t\tevent: {event}")
 
     def get_all_events_in_timeframe(self, begin_time, end_time):
+        """
+        Retrieve all events that occurred within a specified timeframe.
+
+        Parameters:
+        - begin_time (datetime): The start time of the timeframe.
+        - end_time (datetime): The end time of the timeframe.
+
+        Returns:
+        - list: A list of events that occurred within the specified timeframe.
+        """
         in_timeframe = []
         for event in self.events:
-            if event.time >= begin_time and event.time <= end_time:
+            if begin_time <= event.time <= end_time:
                 in_timeframe.append(event)
         return in_timeframe

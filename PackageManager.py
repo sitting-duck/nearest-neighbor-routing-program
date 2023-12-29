@@ -2,19 +2,36 @@ from CSVParser_Packages import CSVParser_Packages  # authored by student
 from HashTable import HashTable  # authored by student
 
 class PackageManager:
+    """
+    A class for managing packages, including storing, retrieving, and checking package details.
+    Utilizes a hash table for efficient storage and retrieval of package information.
+    """
 
     def __init__(self):
         """
+        Initialize the PackageManager by parsing package data from a CSV file
+        and storing it in a hash table for efficient access.
         """
         packages_parser = CSVParser_Packages("packages.csv")
-        package_tuples = packages_parser.parse2()  # tuple is: (package_id, package_object)
+        package_tuples = packages_parser.parse()  # tuple is: (package_id, package_object)
         my_hash_table = HashTable(len(package_tuples))
         for package_tuple in package_tuples:
             my_hash_table.add(package_tuple[0], package_tuple[1])
         self.packages_hash_table = my_hash_table
         self.package_cache = my_hash_table
 
-    def get_unique_locations(self, package_load, location_strings):
+    @staticmethod
+    def get_unique_locations(package_load, location_strings):
+        """
+        Get a list of unique locations from a load of packages.
+
+        Parameters:
+        - package_load (list): A list of package objects.
+        - location_strings (list): A list of location strings.
+
+        Returns:
+        - list: A list of unique location strings.
+        """
         unique_locations = []
         for package in package_load:
             unique_locations.append(package.get_address_string())
@@ -23,12 +40,12 @@ class PackageManager:
 
     def how_many_packages(self):
         """
-        Retrieve the total number of packages in the manager's hash table.
+        Retrieve the total number of buckets in the manager's hash table.
 
         Returns:
-        - int: The number of packages contained within the hash table.
+        - int: The number of buckets contained within the hash table.
         """
-        return self.packages_hash_table.how_many_packages()
+        return self.packages_hash_table.how_many_buckets()
 
     def get_all_packages(self):
         """
@@ -37,8 +54,8 @@ class PackageManager:
         Returns:
         - list: A list containing the package objects.
         """
-        howmany = self.packages_hash_table.how_many_packages()
-        return self.packages_hash_table.get_n_packages(howmany)
+        howmany = self.packages_hash_table.how_many_buckets()
+        return self.packages_hash_table.get_n_buckets(howmany)
     def get_packages(self, howmany):
         """
         Fetch a specified number of packages from the manager's hash table.
@@ -49,7 +66,7 @@ class PackageManager:
         Returns:
         - list: A list containing the specified number of package objects.
         """
-        return self.packages_hash_table.get_n_packages(howmany)
+        return self.packages_hash_table.get_n_buckets(howmany)
 
     def does_package_exist(self, package_id):
         """
@@ -61,42 +78,32 @@ class PackageManager:
         Returns:
         - bool: True if the package exists, False otherwise.
         """
-        # try:
-        #     if self.packages_hash_table.get(package_id):
-        #         print(f"package with id: {package_id} does exist")
-        #         return True
-        #     else:
-        #         print(f"package with id {package_id} does NOT exist")
-        #         return False
-        # except:
-        #     print(f"package with id {package_id} does NOT exist")
-        #     return False
-        #
-        # return True if self.packages_hash_table.get(package_id) else False
-        if self.packages_hash_table.check_id_exists(package_id):
+        if self.packages_hash_table.check_key_exists(package_id):
             print(f"package with id: {package_id} exists.")
             return True
         else:
             print(f"package with id: {package_id} does NOT exist.")
 
     def print_all_package_ids(self):
-        packages = self.packages_hash_table.get_copy_all_packages()
+        """
+        Print the IDs of all packages currently stored in the hash table.
+        """
+        packages = self.packages_hash_table.get_copy_all_buckets()
         for package in packages:
             print(package.id_unique, end=" ")
 
     def get_all_package_ids(self):
+        """
+        Get a list of all package IDs stored in the manager's hash table.
+
+        Returns:
+        - list: A list of package IDs.
+        """
         ids = []
-        packages = self.package_cache.get_copy_all_packages()
+        packages = self.package_cache.get_copy_all_buckets()
         for package in packages:
             ids.append(package.id_unique)
         return ids
-
-    def get_all_packages_copy(self):
-        """
-        may not work
-        :return:
-        """
-        return self.package_cache
 
     def input_valid_package_id(self):
         """

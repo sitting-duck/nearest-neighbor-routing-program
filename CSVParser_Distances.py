@@ -1,12 +1,25 @@
 class CSVParser_Distances:
     """
-    # Example usage:
-        file_path = "path_to_your_csv_file.csv"
-        matrix = create_adjacency_matrix(file_path)
-        for row in matrix:
-            print(row)
+    A class for parsing distance data from a CSV file and converting it into an adjacency matrix.
+
+    Example usage:
+    file_path = "path_to_your_csv_file.csv"
+    parser = CSVParser_Distances(file_path)
+    matrix = parser.create_adjacency_matrix(parser.get_unique_location_strings())
+    for row in matrix:
+        print(row)
     """
+
     def __init__(self, file_path):
+        """
+        Initialize the CSV parser with the path to the CSV file containing distance data.
+
+        Parameters:
+        - file_path (str): The path to the CSV file containing distance data.
+
+        Raises:
+        - Exception: If the file at the given path does not exist.
+        """
         # Try to open the file to check if it exists
         try:
             file = open(file_path, 'r')
@@ -17,6 +30,12 @@ class CSVParser_Distances:
         self.file_path = file_path
 
     def get_unique_location_strings(self):
+        """
+        Extracts unique location strings from the CSV file.
+
+        Returns:
+        - list: A list of unique location strings found in the CSV file.
+        """
         location_strings = []
 
         with open(self.file_path, 'r') as file:
@@ -47,11 +66,18 @@ class CSVParser_Distances:
             return location_strings
 
     def create_adjacency_matrix(self, locations):
+        """
+        Creates an adjacency matrix from the CSV file using the provided locations.
 
+        Parameters:
+        - locations (list): A list of locations.
+
+        Returns:
+        - list of lists: An adjacency matrix representing distances between locations.
+        """
         current_str = ""
-        inside_quotes = False
-        current_row = [] # we will construct a 2D matrix row by row
-        list_of_rows = [] # and add to this list of rows (ultimately forming columns in a 2D matrix)
+        current_row = []  # we will construct a 2D matrix row by row
+        list_of_rows = []  # and add to this list of rows (ultimately forming columns in a 2D matrix)
         num_locations = len(locations)
 
         with open(self.file_path, 'r') as file:

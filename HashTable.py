@@ -15,7 +15,7 @@ class HashTable:
 
         self.size = size
         self.table = [[] for _ in range(self.size)]
-        self.num_packages = 0
+        self.num_buckets = 0
 
     def hash_function(self, key):
         """
@@ -34,7 +34,7 @@ class HashTable:
 
         return int_key % self.size
 
-    def get_package_id_from_hash(self, key):
+    def get_key_from_hash(self, key):
         """
         Retrieve package ID using the hash key.
 
@@ -45,25 +45,6 @@ class HashTable:
         - int: The package ID.
         """
         return self.size - key
-
-    @staticmethod
-    def string_hash(input_string: str) -> int:
-        """
-        Generate a hash value from a string.
-
-        Parameters:
-        - input_string (str): The string to be hashed.
-
-        Returns:
-        - int: The hash value for the string.
-        """
-        mod_base = 2 ** 32 - 1
-        hash_value = 0
-
-        for char in input_string:
-            hash_value = (hash_value + ord(char)) % mod_base
-
-        return hash_value
 
     def add(self, key, value):
         """
@@ -88,11 +69,12 @@ class HashTable:
         else:
             bucket.append((key, value))
 
-        self.num_packages += 1
+        self.num_buckets += 1
 
     def get(self, key):
         """
-        Retrieve the value associated with a given key.
+        LOOK UP FUNCTION
+        Retrieve the value associated with a given key. ie. The "look up function"
 
         Parameters:
         - key: The key whose associated value is to be retrieved.
@@ -133,7 +115,8 @@ class HashTable:
                     k, v = kv
                     print(f"  Key: {k}, Value: {v}")
 
-    def get_n_packages(self, num):
+# todo: get n buckets
+    def get_n_buckets(self, num):
         """
         Fetch a specified number of package entries from the hash table. Note: the fetched packages will be
         removed from the array internally.
@@ -149,31 +132,47 @@ class HashTable:
         else:
             howmany = len(self.table)
 
-        packages = self.table[0:howmany]
+        buckets = self.table[0:howmany]
         self.table = self.table[howmany:]
-        self.num_packages -= howmany
+        self.num_buckets -= howmany
 
         package_list = []
-        for package in packages:
-            package_list.append(package[0][1])
+        for bucket in buckets:
+            package_list.append(bucket[0][1])
         return package_list
 
-    def how_many_packages(self):
+    def how_many_buckets(self):
         """
         Retrieve the total number of packages stored in the hash table.
 
         Returns:
         - int: The total number of packages.
         """
-        return self.num_packages
+        return self.num_buckets
 
-    def check_id_exists(self, id):
+    def check_key_exists(self, id):
+        """
+        Check if a package with the given unique ID exists in the hash table.
+
+        Parameters:
+        - id: The unique identifier of the package to check.
+
+        Returns:
+        - bool: True if the package exists, False otherwise.
+        """
         for package in self.table:
             if package.id_unique == id:
                 return True
         return False
 
-    def get_copy_all_packages(self):
+
+    def get_copy_all_buckets(self):
+        """
+        Get a copy of all package entries in the hash table.
+
+        Returns:
+        - list: A list of all package entries, each represented as a tuple of (key, value).
+        """
         howmany = len(self.table)
         packages = self.table[0:howmany]
         package_list = []

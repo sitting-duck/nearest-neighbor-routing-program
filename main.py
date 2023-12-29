@@ -8,21 +8,26 @@ import TimeUtils
 
 from CSVParser_Distances import CSVParser_Distances  # authored by student
 from CSVParser_Locations import CSVParser_Locations  # authored by student
-from TimeUtils import *  # authored by student
-
-from Location import Location  # authored by student
-from NearestNeighbor import NearestNeighbor  # authored by student
-from Driver import Driver  # authored by student
-
-from PackageManager import PackageManager
-from TestPackageManager import TestPackageManager
-
-from EventManager import EventManager  # authored by student
-from TestEventManager import TestEventManager # authored by student
+from TimeUtils import *                              # authored by student
+from Location import Location                        # authored by student
+from NearestNeighbor import NearestNeighbor          # authored by student
+from Driver import Driver                            # authored by student
+from PackageManager import PackageManager            # authored by student
+from EventManager import EventManager                # authored by student
 
 
 
 def init_data(num_drivers):
+    """
+    Initialize all necessary data structures and objects for the program.
+
+    Parameters:
+    - num_drivers (int): Number of drivers to be initialized.
+
+    Returns:
+    A tuple containing initialized package manager, adjacency matrix, locations,
+    location strings, and drivers.
+    """
     # init packages
     package_manager = PackageManager()  # init package manager
 
@@ -46,6 +51,15 @@ def init_data(num_drivers):
     return package_manager, adjacency_matrix, locations, location_strings, drivers
 
 def init_drivers(num_drivers):
+    """
+    Initialize drivers for the delivery system.
+
+    Parameters:
+    - num_drivers (int): The number of drivers to be initialized.
+
+    Returns:
+    A list of Driver objects.
+    """
     drivers = []
     for driver_id_num in range(0, num_drivers):
         driver = Driver(driver_id_num, earliest_start_time)
@@ -54,15 +68,16 @@ def init_drivers(num_drivers):
 
 if __name__ == '__main__':
 
-    # initialize variables
-    max_pkg_load_size_per_truck = 16  # max num packages a truck can hold
-    num_trucks = 3   # 3 trucks total
-    num_drivers = 2  # two drivers max
-    max_miles = 140 # the two trucks combined cannot travel more than 140 miles
-    earliest_start_time = get_time("8:00am") # earliest start time
-    avg_speed_mph = 18  # avg speed. Packing/unpacking truck takes no time.
-    avg_num_pkgs_per_day = 40 # num packages to deliver each day
+    # Initialize various variables and constants for the program
+    max_pkg_load_size_per_truck = 16  # Maximum number of packages a truck can hold
+    num_trucks = 3  # Total number of trucks
+    num_drivers = 2  # Maximum number of drivers
+    max_miles = 140  # Maximum miles the two trucks combined can travel
+    earliest_start_time = get_time("8:00am")  # Earliest start time for drivers
+    avg_speed_mph = 18  # Average speed in miles per hour. Assumes no time for packing/unpacking.
+    avg_num_pkgs_per_day = 40  # Average number of packages to deliver each day
 
+    # Initialize data structures
     package_manager, adj_matrix, locations, location_strings, drivers = init_data(num_drivers) # init all data structures
     package_id_cache = package_manager.get_all_package_ids()
 
@@ -80,26 +95,28 @@ if __name__ == '__main__':
         # Get packageID from the user
         print("Choose an option from below or enter 'quit' to exit the program. ")
         print("1: see a package status at a a particular time")
-        print("2: see all events within a certain time range")
-        print("3: see all pickup events")
-        print("4: see all delivery events")
-        print("5: see status of all packages at a particular time (long output)")
-        print("6: see all times HUB was visited")
-        print("7: print all events")
-        print("8: see status of all packages at a particular time (short output)")
+        print("2: see status of all packages at a particular time")
+        print("3: total milage and final status of all packages")
 
         option = input("Enter an option: ")
 
-        # Exit condition
+        # Process user input and provide corresponding functionality
+        # Exit the program if 'quit' is entered
         if option.lower() == 'quit':
             break
+
+        # Handle invalid input
         if option.isdigit() == False:
             print("Error: enter a number value for option or 'quit' to exit. Try again.")
             continue
 
+        # Check for valid option range
         if int(option) < 1 or int(option) > 8:
             print("Error: enter a number value for option or 'quit' to exit. Try again.")
             continue
+
+        if option.lower() == 'quit':
+                break
 
         if option == "1":
             package_id = input("Enter the packageID (or 'quit' to exit): ")
@@ -123,46 +140,8 @@ if __name__ == '__main__':
             # Now you can process or store the packageID and time as required
             print(f"package: {package_id} at time: {time_str} is: {status}")
             event_manager.print_all_events_for_package(package_id)
+
         elif option == "2":
-            start_time = input_valid_time()
-            end_time = input_valid_time()
-            events_in_time_frame = event_manager.get_all_events_in_timeframe(start_time, end_time)
-            for event in events_in_time_frame:
-                print(f"event: {event}")
-        elif option == "3":
-            pickups = event_manager.get_all_pickup_events()
-            for event in pickups:
-                print(f"event: {event}")
-        elif option == "4":
-            deliveries = event_manager.get_all_delivery_events()
-            for event in deliveries:
-                print(f"event: {event}")
-        elif option == "5":
-            time = TimeUtils.input_valid_time()
-            time_str = TimeUtils.get_time_string(time)
-            for package_id in package_id_cache:
-                status, driver_id, event_time = event_manager.get_package_status_at_time(package_id, time)
-                if driver_id == -1:
-                    print(f"{time_str} package: {package_id} status: {status}")
-                else:
-                    print(f"{time_str} package: {package_id} status: {status} driver_id: {driver_id}")
-
-            print("Driver mileage at time: ")
-            for driver in drivers:
-                mileage_at_time = driver.get_mileage_at_time(time)
-                print(f"\t{time_str} driver: {driver.idNum} mileage: {mileage_at_time}")
-        elif option == "6":
-            times = event_manager.get_times_hub_was_visited()
-            print(times)
-        elif option == "7":
-            event_manager.print_all_events()
-
-            print("Total Driver Mileage: ")
-            for driver in drivers:
-                mileage = driver.get_total_mileage()
-                print(f"\t driver: {driver.idNum} mileage: {mileage}")
-
-        elif option == "8":
             time = TimeUtils.input_valid_time()
             time_str = TimeUtils.get_time_string(time)
             at_hub, en_route, delivered_with_time = event_manager.get_package_bundles_at_time(time, package_id_cache)
@@ -177,6 +156,17 @@ if __name__ == '__main__':
             for driver in drivers:
                 mileage_at_time = driver.get_mileage_at_time(time)
                 print(f"\t{time_str} driver: {driver.idNum} mileage: {mileage_at_time}")
+
+        elif option == "3":
+            deliveries = event_manager.get_all_delivery_events()
+            for delivery in deliveries:
+                print(delivery)
+
+            print("Driver mileage: ")
+            for driver in drivers:
+                time = TimeUtils.get_time("11:59pm")
+                mileage_at_time = driver.get_mileage_at_time(time)
+                print(f"\t driver: {driver.idNum} mileage: {mileage_at_time}")
 
 
     print("Goodbye!")
