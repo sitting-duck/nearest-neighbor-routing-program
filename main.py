@@ -159,7 +159,8 @@ if __name__ == '__main__':
 
         elif option == "3":
             deliveries = event_manager.get_all_delivery_events()
-            for delivery in deliveries:
+            sorted_deliveries = sorted(deliveries, key=lambda event: int(event.package_id))
+            for delivery in sorted_deliveries:
                 print(delivery)
 
             print("Driver mileage: ")

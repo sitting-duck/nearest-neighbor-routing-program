@@ -165,7 +165,9 @@ class EventManager:
                 en_route.append(package_id)
             elif status.startswith("Delivered"):
                 delivered_with_time.append((package_id, event_time, driver_id))
-        return at_hub, en_route, delivered_with_time
+
+        sorted_delivered_with_time = sorted(delivered_with_time, key=lambda x: int(x[0]))
+        return at_hub, en_route, sorted_delivered_with_time
 
     def get_package_status_at_time(self, package_id, query_time):
         """
