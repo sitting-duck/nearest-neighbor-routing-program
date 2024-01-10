@@ -92,7 +92,7 @@ if __name__ == '__main__':
     event_manager = EventManager(package_manager, max_pkg_load_size_per_truck, location_strings, adj_matrix, nearest_neighbor_algo, drivers)
 
     while True:
-        # Get packageID from the user
+        # Main Menu
         print("Choose an option from below or enter 'quit' to exit the program. ")
         print("1: see a package status at a a particular time")
         print("2: see status of all packages at a particular time")
@@ -168,6 +168,9 @@ if __name__ == '__main__':
                 time = TimeUtils.get_time("11:59pm")
                 mileage_at_time = driver.get_mileage_at_time(time)
                 print(f"\t driver: {driver.idNum} mileage: {mileage_at_time}")
+
+            print("boop")
+            event_manager.print_all_events_for_package("25")
 
 
     print("Goodbye!")

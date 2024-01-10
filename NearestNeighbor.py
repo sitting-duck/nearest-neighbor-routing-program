@@ -54,6 +54,7 @@ class NearestNeighbor:
         while unvisited:
             # Find the nearest unvisited node
             nearest_node = min(unvisited, key=lambda node: adj_matrix[current_node][node])
+
             current_cost = adj_matrix[current_node][nearest_node]
 
             # Update total cost and time traveled

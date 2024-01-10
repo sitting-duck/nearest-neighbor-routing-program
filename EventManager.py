@@ -47,6 +47,7 @@ class EventManager:
                 load_size = min(max_pkg_load_size_per_truck,
                                 how_many_packages)  # decide whether to get 16 or all remaining
                 package_load = package_manager.get_packages(load_size)  # get load of determined size
+
                 new_pickup_time = driver.get_last_start_time()  # new pickup time is the beginning of the next drive session
 
                 new_pickup_time_str = TimeUtils.get_time_string(new_pickup_time)  # new pickup time as string
@@ -298,7 +299,7 @@ class EventManager:
         This function filters and prints only the events that are related to the given package ID.
 
         Parameters:
-        - package_id (int or str): The ID of the package whose events are to be printed.
+        - package_id (str): The ID of the package whose events are to be printed.
         """
         for event in self.events:
             if event.package_id == package_id:
