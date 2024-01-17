@@ -141,7 +141,10 @@ if __name__ == '__main__':
             # Now you can process or store the packageID and time as required
             print(f"package: {package_id} at time: {time_str} is: {status}")
             event_manager.print_all_events_for_package(package_id)
-            print(package_manager_cache.get_package_copy(package_id))
+            package = package_manager_cache.get_package_copy(package_id)
+            package.set_delivery_time(status[2])
+            package.set_status(status[0])
+            print(package)
 
             # if package_manager_cache.does_package_exist(package_id):
             #     print("boop")
@@ -155,11 +158,23 @@ if __name__ == '__main__':
             time_str = TimeUtils.get_time_string(time)
             at_hub, en_route, delivered_with_time = event_manager.get_package_bundles_at_time(time, package_id_cache)
             print(f"at hub: {at_hub}")
+            for package_id in at_hub:
+                package = package_manager_cache.get_package_copy(package_id)
+                print(package)
 
             print(f"en route: {en_route}")
+            for package_id in en_route:
+                package = package_manager_cache.get_package_copy(package_id)
+                package.set_status("En Route")
+                print(package)
+
             print(f"delivered:")
             for item in delivered_with_time:
                 print(f"package id: {item[0]} delivery time: {item[1]} driverID: {item[2]}")
+                package = package_manager_cache.get_package_copy(item[0])
+                package.set_status("Delivered")
+                package.set_delivery_time(item[1])
+                print(package)
 
             print("Driver mileage at time: ")
             for driver in drivers:
@@ -171,6 +186,11 @@ if __name__ == '__main__':
             sorted_deliveries = sorted(deliveries, key=lambda event: int(event.package_id))
             for delivery in sorted_deliveries:
                 print(delivery)
+                package = package_manager_cache.get_package_copy(delivery.package_id)
+                package.set_status("Delivered")
+                package.set_delivery_time(TimeUtils.get_time_string(delivery.time))
+                print(package)
+
 
             print("Driver mileage: ")
             for driver in drivers:
@@ -178,7 +198,6 @@ if __name__ == '__main__':
                 mileage_at_time = driver.get_mileage_at_time(time)
                 print(f"\t driver: {driver.idNum} mileage: {mileage_at_time}")
 
-            print("boop")
             event_manager.print_all_events_for_package("25")
 
 

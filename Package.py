@@ -99,3 +99,20 @@ class Package:
         """
         return self.address + ", " + self.city + ", " + self.state + " " + self.zip_code
 
+    def set_delivery_time(self, delivery_time):
+        """
+        Set a delivery time string for the package.
+
+        Returns:
+        - nothing
+        """
+        self.delivery_time = delivery_time
+
+    def set_status(self, status):
+        """
+        Set a status string for the package.
+
+        Returns:
+        - nothing
+        """
+        self.status = status
