@@ -58,7 +58,8 @@ class PackageManager:
         return self.packages_hash_table.get_n_buckets(howmany)
     def get_packages(self, howmany):
         """
-        Fetch a specified number of packages from the manager's hash table.
+        Fetch a specified number of packages from the manager's hash table. Note: this will REMOVE the packages from
+        the hash table and return them so you must store them after retrieving them.
 
         Parameters:
         - howmany (int): The number of packages to fetch from the hash table.
@@ -83,6 +84,19 @@ class PackageManager:
             return True
         else:
             print(f"package with id: {package_id} does NOT exist.")
+
+    def get_package_copy(self, package_id):
+        """
+        Returns a package with matching id. Assumes package exists. Use does_package_exist prior to calling this
+        function, or you will throw an exception.
+
+        Parameters:
+        - package_id (int or str): The ID of the package to be checked.
+
+        Returns:
+        - bool: Package object with matching package_id from the internal hash table.
+        """
+        return self.packages_hash_table.get_copy(package_id)
 
     def print_all_package_ids(self):
         """

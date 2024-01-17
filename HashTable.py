@@ -1,3 +1,5 @@
+import copy
+
 class HashTable:
     """
     A simple hash table implementation for storing and managing packages.
@@ -77,7 +79,7 @@ class HashTable:
         Retrieve the value associated with a given key. ie. The "look up function"
 
         Parameters:
-        - key: The key whose associated value is to be retrieved.
+        - key (str): The key whose associated value is to be retrieved.
 
         Returns:
         - The value associated with the key or None if the key doesn't exist.
@@ -89,6 +91,25 @@ class HashTable:
             k, v = kv
             if key == k:
                 return v
+        return None
+
+    def get_copy(self, key):
+        """
+        Retrieve a copy of the value associated with a given key. Similar to the lookup function but non destructive.
+
+        Parameters:
+        - key (str): The key whose associated value is to be retrieved.
+
+        Returns:
+        - A deep copy of the value associated with the key or None if the key doesn't exist.
+        """
+        hash_index = self.hash_function(key)
+        bucket = self.table[hash_index]
+
+        for kv in bucket:
+            k, v = kv
+            if key == k:
+                return copy.deepcopy(v)
         return None
 
     def delete(self, key):

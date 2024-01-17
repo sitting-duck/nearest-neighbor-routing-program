@@ -4,8 +4,8 @@
 # Program Mentor: Denece Meyer, (385) 428-6184, Mountain Time
 # email: athar16@my.wgu.edu, ashley.tharp@gmail.com
 
-import TimeUtils
-
+import copy
+import TimeUtils                                     # authored by student
 from CSVParser_Distances import CSVParser_Distances  # authored by student
 from CSVParser_Locations import CSVParser_Locations  # authored by student
 from TimeUtils import *                              # authored by student
@@ -79,6 +79,7 @@ if __name__ == '__main__':
 
     # Initialize data structures
     package_manager, adj_matrix, locations, location_strings, drivers = init_data(num_drivers) # init all data structures
+    package_manager_cache = copy.deepcopy(package_manager)
     package_id_cache = package_manager.get_all_package_ids()
 
     print(f"after init func: {package_manager.how_many_packages()}")
@@ -140,6 +141,14 @@ if __name__ == '__main__':
             # Now you can process or store the packageID and time as required
             print(f"package: {package_id} at time: {time_str} is: {status}")
             event_manager.print_all_events_for_package(package_id)
+            print(package_manager_cache.get_package_copy(package_id))
+
+            # if package_manager_cache.does_package_exist(package_id):
+            #     print("boop")
+            #     print(package_manager_cache.get_package_copy(package_id))
+            # else:
+            #     print("OH NO PACKAGE NO EXIST!")
+
 
         elif option == "2":
             time = TimeUtils.input_valid_time()
